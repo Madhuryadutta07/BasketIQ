@@ -1,4 +1,4 @@
-# 🛒 BasketIQ — Grocery Intelligence Platform
+#  BasketIQ — Grocery Intelligence Platform
 
 BasketIQ is a production-quality full-stack **Grocery Intelligence Platform** that compares grocery baskets across major quick-commerce platforms in India (**Blinkit**, **Zepto**, **Swiggy Instamart**, and **Tata BigBasket**).
 
@@ -6,7 +6,7 @@ Users build a single basket once, and BasketIQ instantly evaluates item availabi
 
 ---
 
-## 🌟 Key Features
+##  Key Features
 
 1. **Editorial UI/UX Design**: Pixel-perfect realization of editorial product design using Cream, Warm White, Muted Green, and Soft Ochre palettes with Newsreader & Inter typography.
 2. **Basket Comparison Engine**: Multi-platform aggregation algorithm calculating line-item totals, delivery fee thresholds, taxes (GST), and net savings.
@@ -19,7 +19,7 @@ Users build a single basket once, and BasketIQ instantly evaluates item availabi
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 - **Frontend**: React 19, TypeScript, Vite, TailwindCSS v4, TanStack Query, Framer Motion, Recharts, Lucide Icons, cmdk
 - **Backend**: Node.js, Express.js, TypeScript, Prisma ORM, PostgreSQL, JWT, bcryptjs, Zod
@@ -27,7 +27,7 @@ Users build a single basket once, and BasketIQ instantly evaluates item availabi
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Start PostgreSQL
 ```bash
