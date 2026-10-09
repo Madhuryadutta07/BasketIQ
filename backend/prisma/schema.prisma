@@ -1,0 +1,230 @@
+// BasketIQ Prisma Schema — SQLite & PostgreSQL compatible
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  avatarUrl    String?  @map("avatar_url")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  carts           Cart[]
+  comparisons     Comparison[]
+  savedLists      SavedList[]
+  searchHistory   SearchHistory[]
+  analyticsEvents AnalyticsEvent[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  iconEmoji   String   @map("icon_emoji")
+  description String?
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Brand {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  logoUrl   String?  @map("logo_url")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  products Product[]
+
+  @@map("brands")
+}
+
+model Platform {
+  id                   String   @id @default(uuid())
+  name                 String   @unique
+  slug                 String   @unique
+  logoUrl              String?  @map("logo_url")
+  color                String   @default("#000000")
+  deliveryTimeMin      Int      @default(10) @map("delivery_time_min")
+  deliveryTimeMax      Int      @default(30) @map("delivery_time_max")
+  deliveryFeeBase      Float    @default(0) @map("delivery_fee_base")
+  deliveryFeeThreshold Float    @default(199) @map("delivery_fee_threshold")
+  isActive             Boolean  @default(true) @map("is_active")
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  platformProducts  PlatformProduct[]
+  comparisonResults ComparisonResult[]
+
+  @@map("platforms")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  imageUrl    String?  @map("image_url")
+  categoryId  String   @map("category_id")
+  brandId     String?  @map("brand_id")
+  unit        String   @default("pcs")
+  unitSize    String?  @map("unit_size")
+  barcode     String?  @unique
+  tags        String   @default("")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  category         Category          @relation(fields: [categoryId], references: [id])
+  brand            Brand?            @relation(fields: [brandId], references: [id])
+  platformProducts PlatformProduct[]
+  cartItems        CartItem[]
+
+  @@map("products")
+}
+
+model PlatformProduct {
+  id              String   @id @default(uuid())
+  platformId      String   @map("platform_id")
+  productId       String   @map("product_id")
+  price           Float
+  mrp             Float
+  discountPercent Float    @default(0) @map("discount_percent")
+  inStock         Boolean  @default(true) @map("in_stock")
+  platformSku     String?  @map("platform_sku")
+  lastUpdated     DateTime @default(now()) @map("last_updated")
+
+  platform     Platform       @relation(fields: [platformId], references: [id])
+  product      Product        @relation(fields: [productId], references: [id])
+  priceHistory PriceHistory[]
+
+  @@unique([platformId, productId])
+  @@map("platform_products")
+}
+
+model PriceHistory {
+  id                String   @id @default(uuid())
+  platformProductId String   @map("platform_product_id")
+  price             Float
+  recordedAt        DateTime @default(now()) @map("recorded_at")
+
+  platformProduct PlatformProduct @relation(fields: [platformProductId], references: [id])
+
+  @@map("price_history")
+}
+
+model Cart {
+  id        String   @id @default(uuid())
+  userId    String?  @map("user_id")
+  sessionId String?  @map("session_id")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user        User?        @relation(fields: [userId], references: [id])
+  items       CartItem[]
+  comparisons Comparison[]
+  savedLists  SavedList[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String   @map("cart_id")
+  productId String   @map("product_id")
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([cartId, productId])
+  @@map("cart_items")
+}
+
+model Comparison {
+  id        String   @id @default(uuid())
+  cartId    String   @map("cart_id")
+  userId    String?  @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  cart    Cart               @relation(fields: [cartId], references: [id])
+  user    User?              @relation(fields: [userId], references: [id])
+  results ComparisonResult[]
+
+  @@map("comparisons")
+}
+
+model ComparisonResult {
+  id                    String   @id @default(uuid())
+  comparisonId          String   @map("comparison_id")
+  platformId            String   @map("platform_id")
+  totalPrice            Float    @map("total_price")
+  deliveryFee           Float    @default(0) @map("delivery_fee")
+  estimatedTax          Float    @default(0) @map("estimated_tax")
+  finalTotal            Float    @map("final_total")
+  availableItems        Int      @map("available_items")
+  unavailableItems      Int      @default(0) @map("unavailable_items")
+  estimatedDeliveryMins Int      @map("estimated_delivery_mins")
+  savingsVsMax          Float    @default(0) @map("savings_vs_max")
+  isCheapest            Boolean  @default(false) @map("is_cheapest")
+  isFastest             Boolean  @default(false) @map("is_fastest")
+  isBestValue           Boolean  @default(false) @map("is_best_value")
+  itemBreakdown         String   @default("[]") @map("item_breakdown")
+
+  comparison Comparison @relation(fields: [comparisonId], references: [id], onDelete: Cascade)
+  platform   Platform   @relation(fields: [platformId], references: [id])
+
+  @@map("comparison_results")
+}
+
+model SavedList {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String
+  cartId    String   @map("cart_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+  cart Cart @relation(fields: [cartId], references: [id])
+
+  @@map("saved_lists")
+}
+
+model SearchHistory {
+  id        String   @id @default(uuid())
+  userId    String?  @map("user_id")
+  query     String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("search_history")
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(uuid())
+  userId    String?  @map("user_id")
+  eventType String   @map("event_type")
+  metadata  String   @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("analytics_events")
+}

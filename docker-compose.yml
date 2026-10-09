@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: basketiq_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: basketiq
+      POSTGRES_PASSWORD: basketiq_pass
+      POSTGRES_DB: basketiq_db
+    ports:
+      - "5432:5432"
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U basketiq -d basketiq_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
