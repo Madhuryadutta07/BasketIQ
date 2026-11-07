@@ -177,11 +177,11 @@ router.get('/search', optionalAuth, async (req: AuthRequest, res: Response): Pro
     const searchVariants = getSearchVariants(query);
     const orConditions: object[] = [];
     for (const v of searchVariants) {
-      orConditions.push({ name: { contains: v } });
-      orConditions.push({ description: { contains: v } });
-      orConditions.push({ tags: { contains: v } });
-      orConditions.push({ brand: { name: { contains: v } } });
-      orConditions.push({ category: { name: { contains: v } } });
+      orConditions.push({ name: { contains: v, mode: 'insensitive' } });
+      orConditions.push({ description: { contains: v, mode: 'insensitive' } });
+      orConditions.push({ tags: { contains: v, mode: 'insensitive' } });
+      orConditions.push({ brand: { name: { contains: v, mode: 'insensitive' } } });
+      orConditions.push({ category: { name: { contains: v, mode: 'insensitive' } } });
     }
 
     const rawProducts = await prisma.product.findMany({

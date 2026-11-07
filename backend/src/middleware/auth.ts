@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma';
+import { getJwtSecret } from '../lib/jwtSecret';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -30,8 +31,7 @@ export const authenticate = async (
       return;
     }
 
-    const secret = process.env.JWT_SECRET;
-    if (!secret) throw new Error('JWT_SECRET not configured');
+    const secret = getJwtSecret();
 
     const decoded = jwt.verify(token, secret) as {
       id: string;
@@ -76,11 +76,7 @@ export const optionalAuth = async (
       return;
     }
 
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      next();
-      return;
-    }
+    const secret = getJwtSecret();
 
     const decoded = jwt.verify(token, secret) as {
       id: string;

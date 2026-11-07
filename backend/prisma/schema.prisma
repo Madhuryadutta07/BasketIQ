@@ -1,11 +1,11 @@
-// BasketIQ Prisma Schema — SQLite & PostgreSQL compatible
+// BasketIQ Prisma Schema — PostgreSQL (e.g. Neon free tier in production)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

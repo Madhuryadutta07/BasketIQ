@@ -12,6 +12,12 @@ function randPrice(base: number, variance = 0.12): number {
 }
 
 async function main() {
+  const force = process.argv.includes('--force');
+  const existing = await prisma.product.count();
+  if (existing > 0 && !force) {
+    console.log(`🌱 Database already has ${existing} products — skipping seed (run with --force to re-seed).`);
+    return;
+  }
   console.log('🌱 Seeding BasketIQ database...');
 
   // ─── CATEGORIES ───────────────────────────────────────────────────
@@ -340,7 +346,7 @@ async function main() {
       const mrp = def.mrp;
       const discountPercent = Math.round(((mrp - price) / mrp) * 100);
 
-      await prisma.platformProduct.upsert({
+      const pp = await prisma.platformProduct.upsert({
         where: { platformId_productId: { platformId: platId, productId: product.id } },
         update: { price, mrp, discountPercent },
         create: {
@@ -353,26 +359,14 @@ async function main() {
         },
       });
 
-      // Seed 7 days of price history
+      // Seed 7 days of price history (single batched insert)
+      const history = [];
       for (let day = 7; day >= 0; day--) {
-        const histPrice = randPrice(adjustedBase, 0.12);
         const d = new Date();
         d.setDate(d.getDate() - day);
-
-        const pp = await prisma.platformProduct.findUnique({
-          where: { platformId_productId: { platformId: platId, productId: product.id } },
-        });
-
-        if (pp) {
-          await prisma.priceHistory.create({
-            data: {
-              platformProductId: pp.id,
-              price: histPrice,
-              recordedAt: d,
-            },
-          });
-        }
+        history.push({ platformProductId: pp.id, price: randPrice(adjustedBase, 0.12), recordedAt: d });
       }
+      await prisma.priceHistory.createMany({ data: history });
     }
 
     productCount++;

@@ -10,8 +10,13 @@ export const getSessionId = (): string => {
   return sessionId;
 };
 
+// Where the backend lives.
+// - Default '/api': same server in production (backend serves this frontend), Vite proxy in dev.
+// - Set VITE_API_URL (e.g. https://basketiq-api.onrender.com/api) only if you host the frontend separately.
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+
 export const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

@@ -12,7 +12,8 @@
     "db:push": "prisma db push",
     "db:seed": "ts-node src/prisma/seed.ts",
     "db:studio": "prisma studio",
-    "db:reset": "prisma migrate reset --force && npm run db:seed"
+    "db:reset": "prisma migrate reset --force && npm run db:seed",
+    "db:seed:prod": "node dist/prisma/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^5.10.2",
@@ -43,5 +44,8 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.4.3"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

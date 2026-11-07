@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma';
 import { authenticate, AuthRequest } from '../middleware/auth';
+import { getJwtSecret } from '../lib/jwtSecret';
 
 const router = Router();
 
@@ -19,7 +20,7 @@ const loginSchema = z.object({
 });
 
 const generateToken = (user: { id: string; email: string; name: string }): string => {
-  const secret = process.env.JWT_SECRET || 'basketiq_secret';
+  const secret = getJwtSecret();
   return jwt.sign(
     { id: user.id, email: user.email, name: user.name },
     secret,
